@@ -56,6 +56,19 @@ module.exports = function (grunt) {
     copy: {
       dist: {
         files: [
+          {
+            expand: true,
+            dest: 'dist/',
+            cwd: 'heroku',
+            src: '*',
+            rename: function (dest, src) {
+                var path = require('path');
+                if (src === 'distpackage.json') {
+                    return path.join(dest, 'package.json');
+                }
+                return path.join(dest, src);
+            }
+          },
           // includes files within path and its sub-directories
           { expand: true, src: ['assets/**'], dest: 'dist/' },
           { expand: true, flatten: true, src: ['game/plugins/*.js'], dest: 'dist/js/plugins/' },
