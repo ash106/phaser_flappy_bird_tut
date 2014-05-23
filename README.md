@@ -1,1 +1,3 @@
 # Flappy Bird Tutorial Project
+
+This is [Alex Howington's](http://wheatboxstudios.com) attempt at the [Flappy Bird Tutorial](http://codevinsky.ghost.io/phaser-2-0-tutorial-flappy-bird-part-1/). I'm also experimenting with Markdown so expect some weird documentation and overuse of emojis. :hankey: :muscle: :trollface: :statue_of_liberty: :sunrise: :cookie: :pizza: I wasn't kidding. Way too many emojis on every document from here on out. :crown: :whale2: :panda_face: 
