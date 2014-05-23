@@ -15,7 +15,32 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":2,"./states/gameover":3,"./states/menu":4,"./states/play":5,"./states/preload":6}],2:[function(require,module,exports){
+},{"./states/boot":3,"./states/gameover":4,"./states/menu":5,"./states/play":6,"./states/preload":7}],2:[function(require,module,exports){
+'use strict';
+
+var Bird = function(game, x, y, frame) {
+  Phaser.Sprite.call(this, game, x, y, 'bird', frame);
+
+  this.anchor.setTo(0.5, 0.5);
+
+  this.animations.add('flap');
+  this.animations.play('flap', 12, true);
+
+  this.game.physics.arcade.enableBody(this);
+};
+
+Bird.prototype = Object.create(Phaser.Sprite.prototype);
+Bird.prototype.constructor = Bird;
+
+Bird.prototype.update = function() {
+  
+  // write your prefab's specific update code here
+  
+};
+
+module.exports = Bird;
+
+},{}],3:[function(require,module,exports){
 
 'use strict';
 
@@ -34,7 +59,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -62,7 +87,7 @@ GameOver.prototype = {
 };
 module.exports = GameOver;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -106,9 +131,10 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
   'use strict';
+  var Bird = require('../prefabs/bird');
   function Play() {}
   Play.prototype = {
     create: function() {
@@ -116,6 +142,10 @@ module.exports = Menu;
       this.game.physics.arcade.gravity.y = 500;
 
       this.background = this.game.add.sprite(0, 0, 'background');
+
+      this.bird = new Bird(this.game, 100, this.game.height/2);
+
+      this.game.add.existing(this.bird);
     },
     update: function() {
 
@@ -126,7 +156,7 @@ module.exports = Menu;
   };
   
   module.exports = Play;
-},{}],6:[function(require,module,exports){
+},{"../prefabs/bird":2}],7:[function(require,module,exports){
 
 'use strict';
 function Preload() {
