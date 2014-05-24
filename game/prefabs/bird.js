@@ -20,4 +20,8 @@ Bird.prototype.update = function() {
   
 };
 
+Bird.prototype.flap = function() {
+  this.body.velocity.y = -400;
+};
+
 module.exports = Bird;

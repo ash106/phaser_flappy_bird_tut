@@ -38,6 +38,10 @@ Bird.prototype.update = function() {
   
 };
 
+Bird.prototype.flap = function() {
+  this.body.velocity.y = -400;
+};
+
 module.exports = Bird;
 
 },{}],3:[function(require,module,exports){
@@ -174,6 +178,13 @@ module.exports = Menu;
 
       this.ground = new Ground(this.game, 0, 400, 335, 112);
       this.game.add.existing(this.ground);
+
+      this.game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
+
+      var flapKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      flapKey.onDown.add(this.bird.flap, this.bird);
+
+      this.input.onDown.add(this.bird.flap, this.bird);
     },
     update: function() {
       this.game.physics.arcade.collide(this.bird, this.ground);
