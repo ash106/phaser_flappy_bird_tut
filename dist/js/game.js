@@ -273,18 +273,22 @@ module.exports = Menu;
       this.game.input.onDown.addOnce(this.startGame, this);
       this.game.input.onDown.add(this.bird.flap, this.bird);
 
-      
-
       this.instructionGroup = this.game.add.group();
       this.instructionGroup.add(this.game.add.sprite(this.game.width/2, 100, 'getReady'));
       this.instructionGroup.add(this.game.add.sprite(this.game.width/2, 325, 'instructions'));
       this.instructionGroup.setAll('anchor.x', 0.5);
       this.instructionGroup.setAll('anchor.y', 0.5);
+
+      this.score = 0;
+
+      this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'flappyfont', this.score.toString(), 24);
+      this.scoreText.visible = false;
     },
     update: function() {
       this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
 
       this.pipes.forEach(function(pipeGroup) {
+        this.checkScore(pipeGroup);
         this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
       }, this);
     },
@@ -312,6 +316,15 @@ module.exports = Menu;
       this.pipeGenerator.timer.start();
 
       this.instructionGroup.destroy();
+
+      this.scoreText.visible = true;
+    },
+    checkScore: function(pipeGroup) {
+      if(pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.bird.world.x) {
+        pipeGroup.hasScored = true;
+        this.score++;
+        this.scoreText.setText(this.score.toString());
+      }
     }
   };
   
@@ -338,6 +351,8 @@ Preload.prototype = {
     this.load.image('startButton', 'assets/start-button.png');
     this.load.image('instructions', 'assets/instructions.png');
     this.load.image('getReady', 'assets/get-ready.png');
+
+    this.load.bitmapFont('flappyfont', 'assets/fonts/flappyfont/flappyfont.png', 'assets/fonts/flappyfont/flappyfont.fnt');
 
     this.load.spritesheet('bird', 'assets/bird.png', 34, 24, 3);
     this.load.spritesheet('pipe', 'assets/pipes.png', 54, 320, 2);

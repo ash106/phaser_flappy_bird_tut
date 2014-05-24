@@ -28,18 +28,22 @@
       this.game.input.onDown.addOnce(this.startGame, this);
       this.game.input.onDown.add(this.bird.flap, this.bird);
 
-      
-
       this.instructionGroup = this.game.add.group();
       this.instructionGroup.add(this.game.add.sprite(this.game.width/2, 100, 'getReady'));
       this.instructionGroup.add(this.game.add.sprite(this.game.width/2, 325, 'instructions'));
       this.instructionGroup.setAll('anchor.x', 0.5);
       this.instructionGroup.setAll('anchor.y', 0.5);
+
+      this.score = 0;
+
+      this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'flappyfont', this.score.toString(), 24);
+      this.scoreText.visible = false;
     },
     update: function() {
       this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
 
       this.pipes.forEach(function(pipeGroup) {
+        this.checkScore(pipeGroup);
         this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
       }, this);
     },
@@ -67,6 +71,15 @@
       this.pipeGenerator.timer.start();
 
       this.instructionGroup.destroy();
+
+      this.scoreText.visible = true;
+    },
+    checkScore: function(pipeGroup) {
+      if(pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.bird.world.x) {
+        pipeGroup.hasScored = true;
+        this.score++;
+        this.scoreText.setText(this.score.toString());
+      }
     }
   };
   
