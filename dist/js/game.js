@@ -169,7 +169,7 @@ module.exports = Menu;
   Play.prototype = {
     create: function() {
       this.game.physics.startSystem(Phaser.Physics.ARCADE);
-      this.game.physics.arcade.gravity.y = 500;
+      this.game.physics.arcade.gravity.y = 1200;
 
       this.background = this.game.add.sprite(0, 0, 'background');
 
