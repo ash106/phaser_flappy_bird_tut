@@ -7,7 +7,8 @@ var Ground = function(game, x, y, width, height) {
 
   this.game.physics.arcade.enableBody(this);
 
-  this.body.allowGravity = false; 
+  this.body.allowGravity = false;
+  this.body.immovable = true; 
 };
 
 Ground.prototype = Object.create(Phaser.TileSprite.prototype);

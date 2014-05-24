@@ -17,7 +17,7 @@
       this.game.add.existing(this.ground);
     },
     update: function() {
-
+      this.game.physics.arcade.collide(this.bird, this.ground);
     },
     clickListener: function() {
       this.game.state.start('gameover');
