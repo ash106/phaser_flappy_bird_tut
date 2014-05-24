@@ -2,6 +2,7 @@
   'use strict';
   var Bird = require('../prefabs/bird');
   var Ground = require('../prefabs/ground');
+  var PipeGroup = require('../prefabs/pipeGroup');
   function Play() {}
   Play.prototype = {
     create: function() {
@@ -12,6 +13,8 @@
 
       this.bird = new Bird(this.game, 100, this.game.height/2);
       this.game.add.existing(this.bird);
+
+      this.pipes = this.game.add.group();
 
       this.ground = new Ground(this.game, 0, 400, 335, 112);
       this.game.add.existing(this.ground);
@@ -30,10 +33,12 @@
       this.game.physics.arcade.collide(this.bird, this.ground);
     },
     generatePipes: function() {
-      console.log('generating pipes!');
-    },
-    clickListener: function() {
-      this.game.state.start('gameover');
+      var pipeY = this.game.rnd.integerInRange(-100, 100);
+      var pipeGroup = this.pipes.getFirstExists(false);
+      if(!pipeGroup) {
+        pipeGroup = new PipeGroup(this.game, this.pipes);
+      }
+      pipeGroup.reset(this.game.width + pipeGroup.width/2, pipeY);
     }
   };
   
