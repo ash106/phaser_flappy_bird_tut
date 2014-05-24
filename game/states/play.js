@@ -30,7 +30,11 @@
       this.pipeGenerator.timer.start();
     },
     update: function() {
-      this.game.physics.arcade.collide(this.bird, this.ground);
+      this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+
+      this.pipes.forEach(function(pipeGroup) {
+        this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+      }, this);
     },
     generatePipes: function() {
       var pipeY = this.game.rnd.integerInRange(-100, 100);
@@ -39,6 +43,14 @@
         pipeGroup = new PipeGroup(this.game, this.pipes);
       }
       pipeGroup.reset(this.game.width + pipeGroup.width/2, pipeY);
+    },
+    deathHandler: function() {
+      this.game.state.start('gameover');
+    },
+    shutdown: function() {
+      this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
+      this.bird.destroy();
+      this.pipes.destroy();
     }
   };
   
