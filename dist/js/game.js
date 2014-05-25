@@ -26,6 +26,8 @@ var Bird = function(game, x, y, frame) {
   this.animations.add('flap');
   this.animations.play('flap', 12, true);
 
+  this.flapSound = this.game.add.audio('flap');
+
   this.alive = false;
 
   this.game.physics.arcade.enableBody(this);
@@ -42,6 +44,8 @@ Bird.prototype.update = function() {
 };
 
 Bird.prototype.flap = function() {
+  this.flapSound.play();
+  
   this.body.velocity.y = -400;
 
   this.game.add.tween(this).to({angle: -40}, 100).start();
@@ -283,6 +287,8 @@ module.exports = Menu;
 
       this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'flappyfont', this.score.toString(), 24);
       this.scoreText.visible = false;
+
+      this.scoreSound = this.game.add.audio('score');
     },
     update: function() {
       this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
@@ -324,6 +330,7 @@ module.exports = Menu;
         pipeGroup.hasScored = true;
         this.score++;
         this.scoreText.setText(this.score.toString());
+        this.scoreSound.play();
       }
     }
   };
@@ -351,6 +358,11 @@ Preload.prototype = {
     this.load.image('startButton', 'assets/start-button.png');
     this.load.image('instructions', 'assets/instructions.png');
     this.load.image('getReady', 'assets/get-ready.png');
+
+    this.load.audio('score', 'assets/score.wav');
+    this.load.audio('flap', 'assets/flap.wav');
+    this.load.audio('pipeHit', 'assets/pipe-hit.wav');
+    this.load.audio('groundHit', 'assets/ground-hit.wav');
 
     this.load.bitmapFont('flappyfont', 'assets/fonts/flappyfont/flappyfont.png', 'assets/fonts/flappyfont/flappyfont.fnt');
 

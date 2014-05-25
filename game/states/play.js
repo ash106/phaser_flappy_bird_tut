@@ -38,6 +38,8 @@
 
       this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'flappyfont', this.score.toString(), 24);
       this.scoreText.visible = false;
+
+      this.scoreSound = this.game.add.audio('score');
     },
     update: function() {
       this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
@@ -79,6 +81,7 @@
         pipeGroup.hasScored = true;
         this.score++;
         this.scoreText.setText(this.score.toString());
+        this.scoreSound.play();
       }
     }
   };

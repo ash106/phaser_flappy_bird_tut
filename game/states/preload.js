@@ -20,6 +20,11 @@ Preload.prototype = {
     this.load.image('instructions', 'assets/instructions.png');
     this.load.image('getReady', 'assets/get-ready.png');
 
+    this.load.audio('score', 'assets/score.wav');
+    this.load.audio('flap', 'assets/flap.wav');
+    this.load.audio('pipeHit', 'assets/pipe-hit.wav');
+    this.load.audio('groundHit', 'assets/ground-hit.wav');
+
     this.load.bitmapFont('flappyfont', 'assets/fonts/flappyfont/flappyfont.png', 'assets/fonts/flappyfont/flappyfont.fnt');
 
     this.load.spritesheet('bird', 'assets/bird.png', 34, 24, 3);
