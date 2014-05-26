@@ -3,6 +3,7 @@
   var Bird = require('../prefabs/bird');
   var Ground = require('../prefabs/ground');
   var PipeGroup = require('../prefabs/pipeGroup');
+  var Scoreboard = require('../prefabs/scoreboard');
   function Play() {}
   Play.prototype = {
     create: function() {
@@ -40,13 +41,24 @@
       this.scoreText.visible = false;
 
       this.scoreSound = this.game.add.audio('score');
+
+      this.scoreboard = new Scoreboard(this.game);
+      this.game.add.existing(this.scoreboard);
     },
     update: function() {
-      this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+      if(this.bird.alive) {
+        this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+      } else {
+        this.game.physics.arcade.collide(this.bird, this.ground, null, null, this);
+      }
 
       this.pipes.forEach(function(pipeGroup) {
         this.checkScore(pipeGroup);
-        this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+        if(this.bird.alive) {
+          this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+        } else {
+          this.game.physics.arcade.collide(this.bird, pipeGroup, null, null, this);
+        }
       }, this);
     },
     generatePipes: function() {
@@ -58,12 +70,20 @@
       pipeGroup.reset(this.game.width + pipeGroup.width/2, pipeY);
     },
     deathHandler: function() {
-      this.game.state.start('gameover');
+      this.bird.alive = false;
+      this.pipes.callAll('stop');
+      this.pipes.forEach(function(pipeGroup) {
+        pipeGroup.setAll('body.velocity.x', 0);
+      }, this);
+      this.pipeGenerator.timer.stop();
+      this.ground.stopScroll();
+      this.scoreboard.show(this.score);
     },
     shutdown: function() {
       this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
       this.bird.destroy();
       this.pipes.destroy();
+      this.scoreboard.destroy();
     },
     startGame: function() {
       this.bird.body.allowGravity = true;

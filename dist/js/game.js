@@ -7,7 +7,6 @@ window.onload = function () {
 
   // Game States
   game.state.add('boot', require('./states/boot'));
-  game.state.add('gameover', require('./states/gameover'));
   game.state.add('menu', require('./states/menu'));
   game.state.add('play', require('./states/play'));
   game.state.add('preload', require('./states/preload'));
@@ -15,7 +14,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":6,"./states/gameover":7,"./states/menu":8,"./states/play":9,"./states/preload":10}],2:[function(require,module,exports){
+},{"./states/boot":7,"./states/menu":8,"./states/play":9,"./states/preload":10}],2:[function(require,module,exports){
 'use strict';
 
 var Bird = function(game, x, y, frame) {
@@ -156,6 +155,92 @@ PipeGroup.prototype.update = function() {
 module.exports = PipeGroup;
 
 },{"./pipe":4}],6:[function(require,module,exports){
+'use strict';
+
+var Scoreboard = function(game) {
+
+  Phaser.Group.call(this, game);
+
+  this.gameover = this.create(this.game.width/2, 100, 'gameover');
+  this.gameover.anchor.setTo(0.5, 0.5);
+
+  this.scoreboard = this.create(this.game.width/2, 200, 'scoreboard');
+  this.scoreboard.anchor.setTo(0.5, 0.5);
+
+  this.scoreText = this.game.add.bitmapText(this.scoreboard.width, 180, 'flappyfont', '', 18);
+  this.add(this.scoreText);
+
+  this.bestScoreText = this.game.add.bitmapText(this.scoreboard.width, 230, 'flappyfont', '', 18);
+  this.add(this.bestScoreText);
+
+  this.startButton = this.game.add.button(this.game.width/2, 300, 'startButton', this.startClick, this);
+  this.startButton.anchor.setTo(0.5, 0.5);
+  this.add(this.startButton);
+
+  this.y = this.game.height;
+  this.x = 0;
+  
+};
+
+Scoreboard.prototype = Object.create(Phaser.Group.prototype);
+Scoreboard.prototype.constructor = Scoreboard;
+
+Scoreboard.prototype.show = function(score) {
+  var medal, bestScore;
+
+  this.scoreText.setText(score.toString());
+
+  if(!!localStorage) {
+    bestScore = localStorage.getItem('bestScore');
+
+    if(!bestScore || bestScore < score) {
+      bestScore = score;
+      localStorage.setItem('bestScore', bestScore);
+    }
+  } else {
+    bestScore = 'N/A';
+  }
+
+  this.bestScoreText.setText(bestScore.toString());
+
+  if(score >= 2 && score < 5) {
+    medal = this.game.add.sprite(-65, 7, 'medals', 1);
+    medal.anchor.setTo(0.5, 0.5);
+    this.scoreboard.addChild(medal);
+  } else if(score >= 5) {
+    medal = this.game.add.sprite(-65, 7, 'medals', 0);
+    medal.anchor.setTo(0.5, 0.5);
+    this.scoreboard.addChild(medal);
+  }
+
+  if(medal) {
+    var emitter = this.game.add.emitter(medal.x, medal.y, 400);
+    this.scoreboard.addChild(emitter);
+    emitter.width = medal.width;
+    emitter.height = medal.height;
+
+    emitter.makeParticles('particle');
+
+    emitter.setRotation(-100, 100);
+    emitter.setXSpeed(0, 0);
+    emitter.setYSpeed(0, 0);
+    emitter.minParticleScale = 0.25;
+    emitter.maxParticleScale = 0.5;
+    emitter.setAll('body.allowGravity', false);
+
+    emitter.start(false, 1000, 1000);
+  }
+
+  this.game.add.tween(this).to({y: 0}, 1000, Phaser.Easing.Bounce.Out, true);
+};
+
+Scoreboard.prototype.startClick = function() {
+  this.game.state.start('play');
+};
+
+module.exports = Scoreboard;
+
+},{}],7:[function(require,module,exports){
 
 'use strict';
 
@@ -173,34 +258,6 @@ Boot.prototype = {
 };
 
 module.exports = Boot;
-
-},{}],7:[function(require,module,exports){
-
-'use strict';
-function GameOver() {}
-
-GameOver.prototype = {
-  preload: function () {
-
-  },
-  create: function () {
-    var style = { font: '65px Arial', fill: '#ffffff', align: 'center'};
-    this.titleText = this.game.add.text(this.game.world.centerX,100, 'Game Over!', style);
-    this.titleText.anchor.setTo(0.5, 0.5);
-
-    this.congratsText = this.game.add.text(this.game.world.centerX, 200, 'You Win!', { font: '32px Arial', fill: '#ffffff', align: 'center'});
-    this.congratsText.anchor.setTo(0.5, 0.5);
-
-    this.instructionText = this.game.add.text(this.game.world.centerX, 300, 'Click To Play Again', { font: '16px Arial', fill: '#ffffff', align: 'center'});
-    this.instructionText.anchor.setTo(0.5, 0.5);
-  },
-  update: function () {
-    if(this.game.input.activePointer.justPressed()) {
-      this.game.state.start('play');
-    }
-  }
-};
-module.exports = GameOver;
 
 },{}],8:[function(require,module,exports){
 
@@ -252,6 +309,7 @@ module.exports = Menu;
   var Bird = require('../prefabs/bird');
   var Ground = require('../prefabs/ground');
   var PipeGroup = require('../prefabs/pipeGroup');
+  var Scoreboard = require('../prefabs/scoreboard');
   function Play() {}
   Play.prototype = {
     create: function() {
@@ -289,13 +347,24 @@ module.exports = Menu;
       this.scoreText.visible = false;
 
       this.scoreSound = this.game.add.audio('score');
+
+      this.scoreboard = new Scoreboard(this.game);
+      this.game.add.existing(this.scoreboard);
     },
     update: function() {
-      this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+      if(this.bird.alive) {
+        this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+      } else {
+        this.game.physics.arcade.collide(this.bird, this.ground, null, null, this);
+      }
 
       this.pipes.forEach(function(pipeGroup) {
         this.checkScore(pipeGroup);
-        this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+        if(this.bird.alive) {
+          this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+        } else {
+          this.game.physics.arcade.collide(this.bird, pipeGroup, null, null, this);
+        }
       }, this);
     },
     generatePipes: function() {
@@ -307,12 +376,20 @@ module.exports = Menu;
       pipeGroup.reset(this.game.width + pipeGroup.width/2, pipeY);
     },
     deathHandler: function() {
-      this.game.state.start('gameover');
+      this.bird.alive = false;
+      this.pipes.callAll('stop');
+      this.pipes.forEach(function(pipeGroup) {
+        pipeGroup.setAll('body.velocity.x', 0);
+      }, this);
+      this.pipeGenerator.timer.stop();
+      this.ground.stopScroll();
+      this.scoreboard.show(this.score);
     },
     shutdown: function() {
       this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
       this.bird.destroy();
       this.pipes.destroy();
+      this.scoreboard.destroy();
     },
     startGame: function() {
       this.bird.body.allowGravity = true;
@@ -336,7 +413,7 @@ module.exports = Menu;
   };
   
   module.exports = Play;
-},{"../prefabs/bird":2,"../prefabs/ground":3,"../prefabs/pipeGroup":5}],10:[function(require,module,exports){
+},{"../prefabs/bird":2,"../prefabs/ground":3,"../prefabs/pipeGroup":5,"../prefabs/scoreboard":6}],10:[function(require,module,exports){
 
 'use strict';
 function Preload() {
@@ -358,6 +435,10 @@ Preload.prototype = {
     this.load.image('startButton', 'assets/start-button.png');
     this.load.image('instructions', 'assets/instructions.png');
     this.load.image('getReady', 'assets/get-ready.png');
+    this.load.image('scoreboard', 'assets/scoreboard.png');
+    this.load.image('gameover', 'assets/gameover.png');
+    this.load.spritesheet('medals', 'assets/medals.png', 44, 46, 2);
+    this.load.image('particle', 'assets/particle.png');
 
     this.load.audio('score', 'assets/score.wav');
     this.load.audio('flap', 'assets/flap.wav');
